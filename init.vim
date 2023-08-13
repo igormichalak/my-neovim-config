@@ -8,17 +8,26 @@ set signcolumn=yes
 
 call plug#begin()
 
+" Visual
+Plug 'folke/tokyonight.nvim'
+Plug 'nvim-tree/nvim-web-devicons'
+Plug 'nvim-lualine/lualine.nvim'
+Plug 'lukas-reineke/indent-blankline.nvim'
+Plug 'lewis6991/gitsigns.nvim'
+Plug 'onsails/lspkind.nvim'
+
+" Functional
 Plug 'nvim-lua/plenary.nvim'
 Plug 'nvim-telescope/telescope.nvim', { 'tag': '0.1.2' }
 Plug 'nvim-telescope/telescope-file-browser.nvim'
 Plug 'nvim-treesitter/nvim-treesitter', { 'do': 'TSUpdate' }
-Plug 'nvim-lualine/lualine.nvim'
-Plug 'nvim-tree/nvim-web-devicons'
-Plug 'tpope/vim-fugitive'
 Plug 'windwp/nvim-autopairs'
-Plug 'lukas-reineke/indent-blankline.nvim'
-Plug 'folke/tokyonight.nvim'
+Plug 'tpope/vim-fugitive'
+
+" Languages
 Plug 'ziglang/zig.vim'
+
+" LSP and completion
 Plug 'neovim/nvim-lspconfig'
 Plug 'hrsh7th/cmp-nvim-lsp'
 Plug 'hrsh7th/cmp-buffer'
@@ -27,8 +36,6 @@ Plug 'hrsh7th/cmp-cmdline'
 Plug 'hrsh7th/nvim-cmp'
 Plug 'hrsh7th/cmp-vsnip'
 Plug 'hrsh7th/vim-vsnip'
-Plug 'onsails/lspkind.nvim'
-Plug 'lewis6991/gitsigns.nvim'
 
 call plug#end()
 
@@ -72,12 +79,20 @@ cmp.event:on(
 )
 
 cmp.setup({
+	enabled = function()
+		local ctx = require 'cmp.config.context'
+		if vim.api.nvim_get_mode().mode == 'c' then
+			return true
+		else
+			return not ctx.in_treesitter_capture("comment")
+				and not ctx.in_syntax_group("Comment")
+		end
+	end,
 	snippet = {
 		expand = function(args)
 			vim.fn["vsnip#anonymous"](args.body)
 		end,
 	},
-	window = {},
 	mapping = cmp.mapping.preset.insert({
 		['<C-b>'] = cmp.mapping.scroll_docs(-4),
 		['<C-f>'] = cmp.mapping.scroll_docs(4),
@@ -106,6 +121,7 @@ cmp.setup({
 	}),
 	sources = cmp.config.sources({
 		{ name = 'nvim_lsp' },
+		{ name = 'vsnip' },
 	}, {
 		{ name = 'buffer' },
 	}),
