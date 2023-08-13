@@ -23,6 +23,7 @@ Plug 'nvim-telescope/telescope-file-browser.nvim'
 Plug 'nvim-treesitter/nvim-treesitter', { 'do': 'TSUpdate' }
 Plug 'windwp/nvim-autopairs'
 Plug 'tpope/vim-fugitive'
+Plug 'numToStr/Comment.nvim'
 
 " Languages
 Plug 'ziglang/zig.vim'
@@ -67,8 +68,10 @@ vim.api.nvim_set_keymap(
 )
 
 require("evil_lualine")
-require("nvim-autopairs").setup {}
 require('gitsigns').setup()
+
+require("nvim-autopairs").setup {}
+require('Comment').setup()
 
 local cmp_autopairs = require('nvim-autopairs.completion.cmp')
 local cmp = require'cmp'
@@ -156,9 +159,35 @@ cmp.setup.cmdline(':', {
 	})
 })
 
+local lspconfig = require'lspconfig'
 local capabilities = require('cmp_nvim_lsp').default_capabilities()
-require('lspconfig')['zls'].setup {
+
+lspconfig['zls'].setup {
 	capabilities = capabilities
 }
+lspconfig['ccls'].setup {
+	capabilities = capabilities
+}
+
+vim.keymap.set('n', '<space>e', vim.diagnostic.open_float)
+vim.keymap.set('n', '[d', vim.diagnostic.goto_prev)
+vim.keymap.set('n', ']d', vim.diagnostic.goto_next)
+vim.keymap.set('n', '<space>q', vim.diagnostic.setloclist)
+
+vim.api.nvim_create_autocmd('LspAttach', {
+	group = vim.api.nvim_create_augroup('UserLspConfig', {}),
+	callback = function(ev)
+		local opts = { buffer = ev.buf }
+		vim.keymap.set('n', 'gD', vim.lsp.buf.declaration, opts)
+		vim.keymap.set('n', 'gd', vim.lsp.buf.definition, opts)
+		vim.keymap.set('n', 'K', vim.lsp.buf.hover, opts)
+		vim.keymap.set('n', 'gi', vim.lsp.buf.implementation, opts)
+		vim.keymap.set('n', '<C-k>', vim.lsp.buf.signature_help, opts)
+		vim.keymap.set('n', '<space>rn', vim.lsp.buf.rename, opts)
+		vim.keymap.set('n', '<space>f', function()
+			vim.lsp.buf.format { async = true }
+		end, opts)
+	end,
+})
 EOF
 
