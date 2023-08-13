@@ -10,6 +10,8 @@ call plug#begin()
 
 Plug 'nvim-lua/plenary.nvim'
 Plug 'nvim-telescope/telescope.nvim', { 'tag': '0.1.2' }
+Plug 'nvim-telescope/telescope-file-browser.nvim'
+Plug 'nvim-treesitter/nvim-treesitter', { 'do': 'TSUpdate' }
 Plug 'nvim-lualine/lualine.nvim'
 Plug 'nvim-tree/nvim-web-devicons'
 Plug 'tpope/vim-fugitive'
@@ -26,6 +28,7 @@ Plug 'hrsh7th/nvim-cmp'
 Plug 'hrsh7th/cmp-vsnip'
 Plug 'hrsh7th/vim-vsnip'
 Plug 'onsails/lspkind.nvim'
+Plug 'lewis6991/gitsigns.nvim'
 
 call plug#end()
 
@@ -35,11 +38,30 @@ let mapleader = "\<Space>"
 
 nnoremap <leader>ff <cmd>Telescope find_files<cr>
 nnoremap <leader>fg <cmd>Telescope live_grep<cr>
-nnoremap <leader>fb <cmd>Telescope buffers<cr>
+" nnoremap <leader>fb <cmd>Telescope buffers<cr>
 
 lua << EOF
+require("telescope").setup {
+	extensions = {
+    		file_browser = {
+			theme = "ivy",
+			hijack_netrw = true,
+		}
+	}
+}
+
+require("telescope").load_extension "file_browser"
+
+vim.api.nvim_set_keymap(
+	"n",
+	"<leader>fb",
+	":Telescope file_browser path=%:p:h select_buffer=true<CR>",
+	{ noremap = true }
+)
+
 require("evil_lualine")
 require("nvim-autopairs").setup {}
+require('gitsigns').setup()
 
 local cmp_autopairs = require('nvim-autopairs.completion.cmp')
 local cmp = require'cmp'
