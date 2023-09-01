@@ -3,7 +3,7 @@ set nobackup
 set nowritebackup
 set number relativenumber
 set scrolloff=5
-set updatetime=300
+set updatetime=250
 set signcolumn=yes
 
 call plug#begin()
@@ -67,6 +67,16 @@ nnoremap <A-k> <C-w>k
 nnoremap <A-l> <C-w>l
 
 lua << EOF
+vim.o.hlsearch = false
+-- vim.o.clipboard = 'unnamedplus'
+vim.o.breakindent = true
+vim.o.undofile = true
+vim.o.ignorecase = true
+vim.o.smartcase = true
+vim.o.timeoutlen = 300
+vim.o.completeopt = 'menuone,noselect'
+vim.o.termguicolors = true
+
 require("telescope").setup {
 	extensions = {
     		file_browser = {
@@ -121,17 +131,32 @@ cmp.setup({
 		['<C-e>'] = cmp.mapping.abort(),
 		['<Tab>'] = cmp.mapping(function(fallback)
 			if cmp.visible() then
-				local entry = cmp.get_selected_entry()
-				if not entry then
-					cmp.select_next_item({ behavior = cmp.SelectBehavior.Select })
-				else
-					cmp.confirm()
-				end
+				cmp.select_next_item({ behavior = cmp.SelectBehavior.Select })
+				-- local entry = cmp.get_selected_entry()
+				-- if not entry then
+				-- 	cmp.select_next_item({ behavior = cmp.SelectBehavior.Select })
+				-- else
+				-- 	cmp.confirm()
+				-- end
 			else
 				fallback()
 			end
 
-		end, {'i', 's', 'c'}),
+		end, {'i', 's'}),
+		['<S-Tab>'] = cmp.mapping(function(fallback)
+			if cmp.visible() then
+				cmp.select_prev_item({ behavior = cmp.SelectBehavior.Select })
+				-- local entry = cmp.get_selected_entry()
+				-- if not entry then
+				-- 	cmp.select_next_item({ behavior = cmp.SelectBehavior.Select })
+				-- else
+				-- 	cmp.confirm()
+				-- end
+			else
+				fallback()
+			end
+
+		end, {'i', 's'}),
 		['<CR>'] = cmp.mapping(function(fallback)
 			if cmp.visible() and cmp.get_active_entry() then
 				cmp.confirm({ behavior = cmp.ConfirmBehavior.Replace, select = false })
